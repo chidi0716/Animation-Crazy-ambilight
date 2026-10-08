@@ -2,7 +2,7 @@
 let console;
 
 (function () {
-  const preMessage = 'Bilibili 環境光 |';
+  const preMessage = '動畫瘋環境光 |';
 
   const enrich = (...args) => {
     if (args.length <= 0) return args;

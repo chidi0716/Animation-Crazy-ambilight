@@ -27,7 +27,7 @@ export const getNodeTreeString = (elem) =>
 
 export const getPageElems = () => {
   const allSelector =
-    'html, body, #app, #bilibili-player, .bpx-player-container, .bpx-player-video-area, .bpx-player-video-wrap, video';
+    'html, body, .BH_background, .container-player, .player, .videoframe, .video, #video-container, .video-js, video';
 
   return {
     counts: allSelector.split(',').reduce((counts, selector) => {

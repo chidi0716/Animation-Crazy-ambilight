@@ -3,6 +3,7 @@ import {
   isWatchPageUrl,
   setErrorHandler,
   setWarning,
+  playerContainerSelector,
   videoSelector,
 } from './libs/generic';
 import ErrorReporter from './libs/errors/reporter';
@@ -13,34 +14,25 @@ setErrorHandler((ex) => ErrorReporter.captureException(ex));
 
 const getVideoElem = () => document.querySelector(videoSelector);
 
-// The top level element of the page that contains the player. For example: #app on /video/ pages
+// The top level element of the page that contains the player: #BH_background
 const getAppElem = (videoElem) => videoElem.closest('body > *');
 
-const getMastheadElem = () =>
-  document.querySelector('#biliMainHeader, #bili-header-container');
+// The header of the page (logo, search bar and the menu)
+const getMastheadElem = () => document.querySelector('body > .top_sky');
 
-let loggedUnsupportedPlayer = false;
+// The right side of the control bar of the player (quality, danmaku, speed, theater mode and fullscreen buttons)
+const settingsMenuBtnParentSelector = '.vjs-control-bar .control-bar-rightbtn';
+
 const tryInitAmbientlight = async () => {
   if (window.ambientlight) return true;
   if (!isWatchPageUrl()) return;
 
   const videoElem = getVideoElem();
-  if (!videoElem) {
-    if (
-      !loggedUnsupportedPlayer &&
-      document.querySelector('.bpx-player-video-wrap bwp-video')
-    ) {
-      loggedUnsupportedPlayer = true;
-      console.warn(
-        '這部影片使用 Bilibili 的 <bwp-video> 播放器播放，目前不支援。'
-      );
-    }
-    return;
-  }
+  if (!videoElem) return;
 
   const settingsMenuBtnParent = videoElem
-    .closest('.bpx-player-container')
-    ?.querySelector('.bpx-player-control-bottom-right');
+    .closest(playerContainerSelector)
+    ?.querySelector(settingsMenuBtnParentSelector);
   if (!settingsMenuBtnParent) return;
 
   const appElem = getAppElem(videoElem);
@@ -56,8 +48,8 @@ const tryInitAmbientlight = async () => {
   return true;
 };
 
-// Bilibili can replace the video and player elements.
-// For example: When navigating to the next video in a playlist or to another part of a video
+// The video.js player can be recreated with a new video element.
+// For example: After the advertisement or when navigating to another episode
 const detectReplacedPlayerElems = () => {
   let scheduled = false;
   let checking = false;
@@ -91,11 +83,11 @@ const detectReplacedPlayerElems = () => {
         ambientlight.initVideoElem(videoElem);
       }
 
-      // Bilibili could have re-rendered the controls of the player
+      // The control bar of the player could have been re-rendered
       if (!ambientlight.settingsMenuBtnParent?.isConnected) {
         const settingsMenuBtnParent =
           ambientlight.videoPlayerElem.querySelector(
-            '.bpx-player-control-bottom-right'
+            settingsMenuBtnParentSelector
           );
         if (settingsMenuBtnParent)
           ambientlight.settingsMenuBtnParent = settingsMenuBtnParent;
@@ -120,7 +112,7 @@ const detectReplacedPlayerElems = () => {
     }
   }, true);
 
-  // Throttled, because the danmaku (comments that fly over the video) mutate the page continuously
+  // Throttled, because the danmaku (comments that fly over the video) and the danmaku list mutate the page continuously
   const observer = new MutationObserver(function onPageMutation() {
     if (scheduled) return;
 

@@ -266,7 +266,7 @@ const SettingsConfig = [
   },
   {
     name: 'videoScale.THEATER',
-    label: '大小（寬螢幕模式）',
+    label: '大小（劇院模式）',
     type: 'list',
     default: 100,
     min: 25,
@@ -741,38 +741,37 @@ const SettingsConfig = [
   {
     name: 'immersiveHeader',
     label: '頁首與搜尋框融入背景',
-    description: '頁面在最上方時頁首完全透明',
+    description: '頁首的 Logo、搜尋框與選單列',
     type: 'checkbox',
     default: true,
   },
   {
     name: 'immersiveTheaterView',
-    label: '寬螢幕模式時隱藏頁首',
-    description: '頁面在最上方時',
+    label: '劇院模式時隱藏捲軸',
     type: 'checkbox',
     default: false,
   },
   {
     name: 'transparentSidePanels',
-    label: '右側欄融入背景',
+    label: '彈幕列表融入背景',
     description:
-      '彈幕列表、選集、關注與訂閱按鈕。透明度可在「頁面內容 > 按鈕與區塊背景不透明度」調整',
+      '影片右邊的彈幕列表與進階設定。透明度可在「頁面內容 > 按鈕與區塊背景不透明度」調整',
     type: 'checkbox',
     default: true,
   },
   {
     name: 'transparentPageContent',
-    label: '影片資訊與留言區融入背景',
+    label: '動畫資訊融入背景',
     description:
-      '影片標籤、活動與推廣卡片、留言輸入框。透明度可在「頁面內容 > 按鈕與區塊背景不透明度」調整',
+      '影片下方的標題、集數列表與作品資料。透明度可在「頁面內容 > 按鈕與區塊背景不透明度」調整',
     type: 'checkbox',
     default: true,
   },
   {
-    name: 'transparentSendingBar',
-    label: '彈幕輸入列融入背景',
+    name: 'transparentComments',
+    label: '留言區融入背景',
     description:
-      '影片下方的輸入列。透明度可在「頁面內容 > 按鈕與區塊背景不透明度」調整',
+      '留言的排序列與留言列表。透明度可在「頁面內容 > 按鈕與區塊背景不透明度」調整',
     type: 'checkbox',
     default: true,
   },
@@ -794,9 +793,9 @@ const SettingsConfig = [
     snapPoints: [
       { value: 0, label: '全部' },
       { value: 1, label: '一般' },
-      { value: 2, hiddenLabel: '一般與寬螢幕' },
-      { value: 3, label: '寬螢幕' },
-      { value: 4, hiddenLabel: '寬螢幕與全螢幕' },
+      { value: 2, hiddenLabel: '一般與劇院模式' },
+      { value: 3, label: '劇院' },
+      { value: 4, hiddenLabel: '劇院模式與全螢幕' },
       { value: 5, label: '全螢幕' },
     ],
   },
@@ -824,7 +823,7 @@ const SettingsConfig = [
     step: 1,
     snapPoints: [
       { value: -1, label: '淺色' },
-      { value: 0, label: '跟隨 B 站' },
+      { value: 0, label: '跟隨動畫瘋' },
       { value: 1, label: '深色' },
     ],
   },

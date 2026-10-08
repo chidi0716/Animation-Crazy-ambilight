@@ -1,5 +1,5 @@
-// Ambient light for Bilibili
-// Based on the styles of Ambient light for YouTube™ by Wessel Kroos (MIT License)
+// Ambient light for ani.gamer.com.tw (巴哈姆特動畫瘋)
+// Based on the styles of the Bilibili port by iceorange-dev of Ambient light for YouTube™ by Wessel Kroos (MIT License)
 
 @mixin input-range-track {
   &::-webkit-slider-runnable-track {@content}
@@ -101,7 +101,7 @@
   top: 5px;
   left: 5px;
   width: calc(100% - 10px);
-  height: inherit;
+  height: calc(100% - 10px);
   color: #fff;
   font-size: 18px;
   pointer-events: none;
@@ -217,7 +217,13 @@ html {
   }
 }
 
-/* Bilibili page */
+/* ani.gamer.com.tw page */
+
+// The settings menu and the bezel are placed in the .videoframe.
+// The page only positions the .videoframe in the theater mode and in fullscreen.
+.BH_background .container-player .player .videoframe {
+  position: relative;
+}
 
 html[data-ambientlight-enabled] {
   // The variables are defined on the html element, because the page background is painted on the html element
@@ -241,7 +247,7 @@ html[data-ambientlight-enabled] {
       var(--ytal-background-opacity)
     );
   }
-  &.night-mode {
+  &[data-theme="dark"] {
     --ytal-page-background: #000;
     @supports (background-color: color-mix(in srgb, #000 0%, #000)) {
       --ytal-page-background: color-mix(in srgb, #808080 var(--ytal-page-background-greyness, 0%), #000000);
@@ -264,15 +270,15 @@ html[data-ambientlight-enabled] {
   body {
     @include scrollbar-light-thin(true);
   }
-  &.night-mode {
+  &[data-theme="dark"] {
     &,
     body {
       @include scrollbar-dark-thin(true);
     }
   }
 
-  // The ambient light is placed at the end of the body (outside of #app, because
-  // Bilibili renders #app with Vue) with a negative z-index behind the content of the page.
+  // The ambient light is placed at the end of the body (outside of #BH_background)
+  // with a negative z-index behind the content of the page.
   // The page background is painted on the html element (canvas), because the background of the
   // positioned body would be painted above the negative z-index of the ambient light
   & {
@@ -283,39 +289,42 @@ html[data-ambientlight-enabled] {
     background: transparent !important;
   }
 
-  // :not(#_) increases the specificity above the id selectors of Bilibili
+  // :not(#_) increases the specificity above the id selectors of the page
   [data-ambientlight-app]:not(#_) {
     background: transparent !important;
   }
 
   /* Player */
 
-  .bpx-player-container {
-    box-shadow: none !important;
-  }
-
-  // The loading placeholder stays behind the loaded player and would cover the ambient light
-  // around the video (black bars) and below the danmaku input bar
-  #bilibili-player-placeholder {
-    visibility: hidden !important;
-  }
-
   // Show the ambient light around the video instead of the black background of the player
-  .bpx-player-video-area {
-    background: none !important;
-    overflow: var(--ytal-html5-video-player-overflow, hidden) !important;
+  .BH_background .container-player .player .videoframe {
+    background: transparent !important;
+    box-shadow: none !important;
+
+    .video,
+    .video-js {
+      background: transparent !important;
+    }
+
+    .video {
+      overflow: var(--ytal-html5-video-player-overflow, hidden) !important;
+    }
+    &.vjs-fullwindow {
+      overflow: var(--ytal-html5-video-player-overflow, hidden) !important;
+    }
   }
-  // The ambient light is hidden in the mini player (when the page is scrolled down)
-  .bpx-player-container[data-screen="mini"] .bpx-player-video-area {
-    background: #000 !important;
+
+  // In fullscreen (body.fullscreen) the page hides all elements except the .videoframe and its
+  // parents. The ambient light is placed inside the .videoframe and the isolation keeps it
+  // (z-index: -1) above the black background of the .container-player
+  body.fullscreen .BH_background .container-player .player .videoframe {
+    isolation: isolate;
   }
 
   /* Video */
 
-  .bpx-player-video-wrap {
-    position: relative;
-
-    > video,
+  .videoframe .video-js {
+    > video.vjs-tech,
     > .ambientlight__video-overlay,
     > .ambientlight__video-debanding {
       // Removes the black bars and resizes the video
@@ -328,13 +337,6 @@ html[data-ambientlight-enabled] {
     > video.ambientlight__chromium-bug-direct-video-overlay-workaround {
       clip-path: var(--ytal-video-clip-path, inset(0% 0%));
       filter: opacity(1);
-    }
-  }
-
-  .bpx-state-mirror .bpx-player-video-wrap {
-    > .ambientlight__video-overlay,
-    > .ambientlight__video-debanding {
-      transform: rotateY(180deg);
     }
   }
 
@@ -357,7 +359,7 @@ html[data-ambientlight-enabled] {
     height: 100%;
   }
 
-  &:not(.night-mode) {
+  &:not([data-theme="dark"]) {
     .ambientlight__shadow {
       filter: invert(1);
     }
@@ -389,8 +391,8 @@ html[data-ambientlight-enabled] {
     }
   }
 
-  // In (web) fullscreen the ambient light is placed inside the player
-  .bpx-player-container {
+  // In fullscreen the ambient light is placed inside the .videoframe
+  .videoframe {
     .ambientlight__container {
       min-height: 0;
       background: #000;
@@ -511,16 +513,28 @@ html[data-ambientlight-enabled] {
 
   /* Page header */
 
+  // The header (.top_sky) contains the fixed .sky (logo and search bar) and the fixed .mainmenu
   [data-ambientlight-masthead] {
-    .bili-header__bar {
+    .sky,
+    .mainmenu {
       transition: background-color .15s, opacity .15s ease-out;
     }
 
-    &.ytal-header-transparent .bili-header__bar {
-      // Sass does not support the relative color syntax
-      background-color: unquote('rgb(from var(--bg1_float) r g b / calc(var(--ytal-fill-opacity, 1) * 2 - 1))') !important;
-      box-shadow: none !important;
-      backdrop-filter: none !important;
+    // Sass does not support the relative color syntax
+    &.ytal-header-transparent {
+      .sky {
+        background-color: unquote('rgb(from var(--card-bg) r g b / calc(var(--ytal-fill-opacity, 1) * 2 - 1))') !important;
+      }
+      .mainmenu {
+        background-color: unquote('rgb(from var(--anime-background-elevated) r g b / calc(var(--ytal-fill-opacity, 1) * 2 - 1))') !important;
+        box-shadow: none !important;
+      }
+      // Below 1000px the menu is a dropdown list that keeps its background
+      @media (min-width: 1001px) {
+        .mainmenu ul {
+          background: transparent !important;
+        }
+      }
     }
 
     img {
@@ -531,153 +545,103 @@ html[data-ambientlight-enabled] {
   /* Immersive: Transparent page header while the page is scrolled to the top */
 
   &[data-ambientlight-immersive-header] [data-ambientlight-masthead] {
-    .bili-header__bar {
-      transition: background-color .2s, box-shadow .2s, opacity .15s ease-out;
+    .sky,
+    .mainmenu {
+      transition: background-color .2s, box-shadow .2s, border-color .2s, opacity .15s ease-out;
     }
 
-    // The search bar keeps the style of Bilibili when it has focus, because the search suggestions are attached below it
-    #nav-searchform:not(.is-focus) {
-      background: var(--ytal-blend-input-background) !important;
+    // The search bar keeps the style of the page when it has focus, because the search suggestions are shown below it
+    .anime_search .anime_search-input input[type=text]:not(:focus) {
+      background-color: var(--ytal-blend-input-background) !important;
       border-color: var(--ytal-blend-border) !important;
     }
 
-    &.at-top .bili-header__bar {
-      background: transparent !important;
-      box-shadow: none !important;
-      text-shadow: 0 0 4px rgba(0, 0, 0, .6);
-    }
-
-    // Keep the content that is scrolled behind the header readable
-    &:not(.at-top) .bili-header__bar {
-      // Sass does not support the relative color syntax
-      background-color: unquote('rgb(from var(--bg1_float) r g b / .75)') !important;
-      backdrop-filter: blur(20px) saturate(1.5);
-    }
-  }
-  &:not(.night-mode)[data-ambientlight-immersive-header] [data-ambientlight-masthead].at-top .bili-header__bar {
-    text-shadow: 0 0 4px rgba(255, 255, 255, .8);
-  }
-
-  /* Immersive: Hide the page header in the wide view while the page is scrolled to the top */
-
-  &[data-ambientlight-immersive] [data-ambientlight-masthead].at-top {
-    .bili-header__bar:not(:hover):not(:focus-within) {
-      opacity: 0;
-    }
-  }
-
-  /* Immersive: Blend in the danmaku list and playlist next to the video */
-
-  &[data-ambientlight-transparent-side-panels] {
-    // Only the outer box gets a translucent background, because stacked backgrounds would look opaque again
-    #danmukuBox .danmaku-wrap,
-    .video-pod {
-      background-color: var(--ytal-background) !important;
-      box-shadow: inset 0 0 0 1px var(--ytal-blend-border) !important;
-    }
-    #danmukuBox {
-      .bpx-docker-minor,
-      .bui-collapse-header,
-      .bui-collapse-body,
-      .bpx-player-dm-function,
-      .bpx-player-dm-wrap {
-        background-color: transparent !important;
+    @media (min-width: 1001px) {
+      .mainmenu ul {
+        background: transparent !important;
       }
     }
 
-    // Buttons and the playing video inside the boxes.
-    // The active class is on .simple-base-item in collections and on .video-pod__item in multi part videos
-    #danmukuBox .bpx-player-dm-btn-history,
-    .video-pod :is(.simple-base-item, .video-pod__item).active,
-    .rcmd-tab .rec-footer {
-      background-color: var(--ytal-background) !important;
+    &.at-top {
+      .sky,
+      .mainmenu {
+        background: transparent !important;
+        border-bottom-color: transparent !important;
+        box-shadow: none !important;
+        text-shadow: 0 0 4px rgba(0, 0, 0, .6);
+      }
+      .mainmenu::before {
+        opacity: 0;
+      }
     }
 
-    // Follow button of the uploader. (The charge button is already transparent)
-    .upinfo-btn-panel .default-btn:not(.new-charge-btn) {
-      background: var(--ytal-background) !important;
+    // Keep the content that is scrolled behind the header readable
+    &:not(.at-top) {
+      .sky,
+      .mainmenu {
+        // Sass does not support the relative color syntax
+        background-color: unquote('rgb(from var(--anime-background-base) r g b / .75)') !important;
+        backdrop-filter: blur(20px) saturate(1.5);
+      }
+    }
+  }
+  &:not([data-theme="dark"])[data-ambientlight-immersive-header] [data-ambientlight-masthead].at-top {
+    .sky,
+    .mainmenu {
+      text-shadow: 0 0 4px rgba(255, 255, 255, .8);
+    }
+  }
+
+  /* Immersive: Blend in the danmaku list next to the video */
+
+  &[data-ambientlight-transparent-side-panels] .player .subtitle {
+    background-color: var(--ytal-background) !important;
+    border-color: var(--ytal-blend-border) !important;
+
+    // The tabs (彈幕列表 and 進階設定) and their header use the --card-bg background
+    > * {
+      --card-bg: transparent;
+    }
+    .sub_top {
+      border-bottom-color: var(--ytal-blend-border) !important;
+    }
+  }
+
+  /* Immersive: Blend in the title, the episodes and the information of the anime */
+
+  &[data-ambientlight-transparent-page-content] {
+    .anime-title,
+    .data {
+      background-color: var(--ytal-background) !important;
       box-shadow: inset 0 0 0 1px var(--ytal-blend-border);
     }
-    // Keep the text of the followed state readable on the translucent background
-    .upinfo-btn-panel .follow-btn:not(.not-follow) {
-      color: var(--text2) !important;
-    }
 
-    // Subscribe button of a collection in the subscribed state. (The unsubscribed state is already transparent)
-    .video-pod .subscribe-btn.subscribed {
+    // The episode buttons. The playing episode keeps the color of the page
+    .season ul li:not(.playing) {
+      background-color: var(--ytal-background) !important;
+    }
+  }
+
+  /* Immersive: Blend in the comments */
+
+  &[data-ambientlight-transparent-comments] {
+    .container-player.commend-title .filter-nav,
+    .webview_commendlist {
       background-color: var(--ytal-background) !important;
       border-color: var(--ytal-blend-border) !important;
     }
-    // Keep a tint of the Bilibili blue when the uploader is not followed yet.
-    // Sass does not support the relative color syntax
-    .upinfo-btn-panel .follow-btn.not-follow {
-      background: unquote('rgb(from var(--brand_blue) r g b / .35)') !important;
-      box-shadow: inset 0 0 0 1px unquote('rgb(from var(--brand_blue) r g b / .7)');
-    }
-  }
 
-  /* Immersive: Blend in the tags of the video and the comment box */
-
-  &[data-ambientlight-transparent-page-content] {
-    .video-tag-container .tag-panel .tag-link {
-      background: var(--ytal-background) !important;
-      box-shadow: inset 0 0 0 1px var(--ytal-blend-border);
-    }
-
-    // Activity vote and promotion banner cards below the description.
-    // They use --bg1 for the card background and for the gradient over the cover image
-    .video-resource-list {
-      --bg1: var(--ytal-background);
-      --line_regular: var(--ytal-blend-border);
-    }
-
-    // The comment box is rendered inside the shadow roots of the comments web components.
-    // CSS variables are inherited into shadow roots. These variables are only used by the
-    // comment boxes in the comments (#editor, #edit of the login prompt, .tool-btn and #input).
-    // --bg1 is also used by the mask over the comments when logged out (#limit-mask-wall) and by
-    // the mention popover. So it is set to the opaque page background instead of a translucent color.
-    bili-comments {
-      --bg1: var(--ytal-page-background);
-      --bg3: var(--ytal-blend-input-background);
-      --Ga1: var(--ytal-blend-border);
-      --bili-comment-textarea-bg: transparent;
-    }
-  }
-
-  /* Immersive: Blend in the danmaku input bar below the video */
-
-  &[data-ambientlight-transparent-sending-bar] .bpx-player-sending-area {
-    // Divider line above the bar
-    &::before {
-      background: transparent !important;
-    }
-
-    .bpx-player-sending-bar {
-      background: transparent !important;
-      text-shadow: var(--ytal-text-shadow);
-    }
-
-    .bpx-player-video-inputbar {
+    .webview_commendlist .c-reply__editor .reply-content .reply-input {
       background: var(--ytal-blend-input-background) !important;
-      box-shadow: inset 0 0 0 1px var(--ytal-blend-border);
-      text-shadow: none;
     }
-
-    // The send button keeps the blue color when a danmaku can be sent
-    .bpx-player-dm-btn-send.bui-disabled .bui-button-blue {
-      background-color: var(--ytal-background) !important;
-    }
-  }
-  &:not(.night-mode)[data-ambientlight-transparent-sending-bar] .bpx-player-sending-area .bpx-player-sending-bar {
-    text-shadow: var(--ytal-text-shadow-inverted);
   }
 }
 
 
 /* Settings */
 
-// Bilibili brand blue
-$accent: #00aeec;
+// ani.gamer.com.tw brand blue
+$accent: #00b4d8;
 
 .ytal-bezel {
   // Replaces the .ytp-bezel styles of the YouTube player
@@ -745,10 +709,11 @@ $accent: #00aeec;
 }
 
 // Keep the controls of the player visible while the settings menu is open
-.bpx-player-container.ytp-ambientlight-settings-shown {
-  .bpx-player-control-bottom,
-  .bpx-player-control-mask,
-  .bpx-player-control-top {
+.videoframe.ytp-ambientlight-settings-shown .video-js {
+  .vjs-control-bar,
+  .control-bar-mask,
+  .top-tool-bar .tools > *,
+  .top-tool-bar .tool-bar-mask {
     opacity: 1 !important;
     visibility: visible !important;
   }
@@ -781,12 +746,6 @@ $accent: #00aeec;
   transition: none;
   &:hover {
     will-change: scroll-position !important; // Improves scrolling performance
-  }
-
-  .bpx-player-container[data-screen="full"] &,
-  .bpx-player-container[data-screen="web"] & {
-    bottom: 90px;
-    max-height: calc(100% - 110px);
   }
 
   *,
@@ -893,7 +852,14 @@ $accent: #00aeec;
 }
 
 .ytp-ambientlight-settings-button {
+  // The other buttons in the control bar are .vjs-control buttons with a Material Icons font icon
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
   color: hsla(0, 0%, 100%, .8);
   cursor: pointer;
 
@@ -903,16 +869,11 @@ $accent: #00aeec;
     color: #fff;
   }
 
-  .bpx-common-svg-icon {
+  .ytp-ambientlight-settings-button__icon {
     display: inline-flex;
-    height: 22px;
-    vertical-align: top;
-
-    .bpx-player-container[data-screen="full"] &,
-    .bpx-player-container[data-screen="web"] & {
-      height: 28px;
-      margin-top: 2px;
-    }
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
   }
 
   svg {
@@ -1963,43 +1924,41 @@ html[data-ambientlight-enabled] {
 
   // Images opacity
   $not-hover: ':not(:hover):not(:focus-within)';
-  .up-panel-container#{$not-hover} .up-avatar-wrap,
-  .video-page-card-small#{$not-hover} .pic-box,
-  .video-pod__item#{$not-hover} .cover,
-  .ad-report#{$not-hover} img {
+  .data .data-file#{$not-hover} .data-img,
+  .anime-title .rating#{$not-hover} img {
     opacity: var(--ytal-image-opacity) !important;
   }
 
   // Shadows (and optionally only text shadows) that keep the content around the video readable
   @mixin filter-and-text-shadow-selectors {
-    [data-ambientlight-masthead].ytal-header-shadow.at-top:not([data-ambientlight-text-shadow]) .bili-header__bar {
+    [data-ambientlight-masthead].ytal-header-shadow.at-top:not([data-ambientlight-text-shadow]) :is(.sky, .mainmenu) {
       @content;
     }
 
-    .left-container > *:not(#playerWrap):not(#commentapp),
-    .right-container-inner > * {
+    .BH_background .anime-title,
+    .BH_background .data {
       @content;
     }
   }
 
-  &:not(.night-mode) {
+  &:not([data-theme="dark"]) {
     @include filter-and-text-shadow-selectors {
       filter: var(--ytal-filter-shadow-inverted) !important;
       text-shadow: var(--ytal-text-shadow-inverted) !important;
     }
   }
 
-  &.night-mode {
+  &[data-theme="dark"] {
     @include filter-and-text-shadow-selectors {
       filter: var(--ytal-filter-shadow) !important;
       text-shadow: var(--ytal-text-shadow) !important;
     }
   }
 
-  [data-ambientlight-masthead].ytal-header-shadow[data-ambientlight-text-shadow] .bili-header__bar {
+  [data-ambientlight-masthead].ytal-header-shadow[data-ambientlight-text-shadow] :is(.sky, .mainmenu) {
     text-shadow: var(--ytal-text-shadow) !important;
   }
-  &:not(.night-mode) [data-ambientlight-masthead].ytal-header-shadow[data-ambientlight-text-shadow] .bili-header__bar {
+  &:not([data-theme="dark"]) [data-ambientlight-masthead].ytal-header-shadow[data-ambientlight-text-shadow] :is(.sky, .mainmenu) {
     text-shadow: var(--ytal-text-shadow-inverted) !important;
   }
 }

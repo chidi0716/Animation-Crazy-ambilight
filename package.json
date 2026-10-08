@@ -1,16 +1,16 @@
 {
-  "name": "bilibili-ambientlight",
+  "name": "ani-gamer-ambientlight",
   "version": "0.1.0",
-  "description": "This browser extension adds ambient light to the videos you view on Bilibili. Based on Ambient light for YouTube by Wessel Kroos.",
+  "description": "This browser extension adds ambient light to the anime you watch on ani.gamer.com.tw (Bahamut Animation Crazy). Based on the Bilibili port by iceorange-dev of Ambient light for YouTube by Wessel Kroos.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iceorange-dev/bilibili-ambilight.git"
+    "url": "git+https://github.com/chidi0716/Animation-Crazy-ambilight.git"
   },
-  "author": "iceorange-dev (Bilibili port), Wessel Kroos (original Ambient light for YouTube)",
+  "author": "chidi0716 (ani.gamer.com.tw port), iceorange-dev (Bilibili port), Wessel Kroos (original Ambient light for YouTube)",
   "license": "MIT",
-  "homepage": "https://github.com/iceorange-dev/bilibili-ambilight#readme",
+  "homepage": "https://github.com/chidi0716/Animation-Crazy-ambilight#readme",
   "bugs": {
-    "url": "https://github.com/iceorange-dev/bilibili-ambilight/issues"
+    "url": "https://github.com/chidi0716/Animation-Crazy-ambilight/issues"
   },
   "type": "module",
   "scripts": {

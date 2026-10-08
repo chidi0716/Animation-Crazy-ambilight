@@ -36,21 +36,14 @@ const getElem = (() => {
   };
 })();
 
-// Bilibili swaps the theme variables stylesheet between light.css and dark.css:
-// <link id="__css-map__" href="//s1.hdslb.com/bfs/seed/jinkela/short/bili-theme/light.css">
-const themeStylesheetRegex = /\/(light|dark)\.css(\?|#|$)/;
+// ani.gamer.com.tw styles the page with the light theme by default and with the dark theme when
+// the html element has the data-theme="dark" attribute. Only the attribute is changed, because the
+// dark mode switch in the menu of the page would also save the theme as the preference of the user.
 function updateTheme(toDark) {
-  document.documentElement.classList.toggle('night-mode', toDark);
+  const theme = toDark ? 'dark' : 'light';
+  if (document.documentElement.getAttribute('data-theme') === theme) return;
 
-  const themeStylesheetElem = document.getElementById('__css-map__');
-  const href = themeStylesheetElem?.getAttribute('href');
-  if (!href || !themeStylesheetRegex.test(href)) return;
-
-  const newHref = href.replace(
-    themeStylesheetRegex,
-    `/${toDark ? 'dark' : 'light'}.css$2`
-  );
-  if (newHref !== href) themeStylesheetElem.setAttribute('href', newHref);
+  document.documentElement.setAttribute('data-theme', theme);
 }
 
 contentScript.addMessageListener(
@@ -146,7 +139,7 @@ contentScript.addMessageListener(
           }
         },
         {
-          rootMargin: '-70px 0px 0px 0px', // header height (64px) + additional pixels to be safe
+          rootMargin: '-105px 0px 0px 0px', // header height (100px) + additional pixels to be safe
           threshold: 0.0001, // Because sometimes a pixel in not visible on screen but the intersectionRatio is already 0
         }
       );

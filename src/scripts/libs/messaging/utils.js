@@ -1,5 +1,5 @@
-export const origin = 'https://www.bilibili.com';
-export const extensionId = 'bilibili-ambient-light-extension';
+export const origin = 'https://ani.gamer.com.tw';
+export const extensionId = 'ani-gamer-ambient-light-extension';
 
 export const isSameWindowMessage = (event) =>
   event.source === window && event.origin === origin;

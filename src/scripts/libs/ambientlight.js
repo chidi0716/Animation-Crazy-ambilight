@@ -17,7 +17,6 @@ import {
   VIEW_SMALL,
   VIEW_THEATER,
   VIEW_FULLSCREEN,
-  VIEW_POPUP,
   setStyleProperty,
   setWarning,
 } from './generic';
@@ -50,8 +49,6 @@ export default class Ambientlight {
   videoScale = 100;
 
   isHidden = true;
-  // The page style (theme and blended elements) is kept while only the ambient light is hidden
-  keepPageStyle = false;
   isOnVideoPage = true;
   showedCompareWarning = false;
   getImageDataAllowed = true;
@@ -65,7 +62,6 @@ export default class Ambientlight {
   isFillingFullscreen = false;
   isVideoHiddenOnWatchPage = false;
   isHdr = false;
-  isMirrored = false;
 
   lastUpdateStatsTime = 0;
   updateStatsInterval = 1000;
@@ -82,10 +78,10 @@ export default class Ambientlight {
 
   constructor(videoElem, appElem, mastheadElem) {
     return async function AmbientlightConstructor() {
-      // The top level element of the webpage that contains the video player (For example: #app)
+      // The top level element of the webpage that contains the video player (#BH_background)
       if (appElem) appElem.toggleAttribute('data-ambientlight-app', true);
       this.appElem = appElem;
-      // The Bilibili page header (optional)
+      // The page header .top_sky (optional)
       if (mastheadElem)
         mastheadElem.toggleAttribute('data-ambientlight-masthead', true);
       this.mastheadElem = mastheadElem;
@@ -145,21 +141,22 @@ export default class Ambientlight {
     this.initVideoElem(videoElem, false);
   }
 
-  // Bilibili video player structure:
-  // .bpx-player-container[data-screen="normal|wide|web|full|mini"]
-  //   .bpx-player-primary-area
-  //     .bpx-player-video-area (videoAreaElem)
-  //       .bpx-player-video-perch
-  //         .bpx-player-video-wrap (videoContainerElem)
-  //           video
-  //       .bpx-player-control-wrap ... .bpx-player-control-bottom-right (settingsMenuBtnParent)
-  //     .bpx-player-sending-area
+  // ani.gamer.com.tw video player structure (video.js):
+  // .container-player[.fullwindow]
+  //   section.player
+  //     .videoframe[.vjs-fullwindow] (videoPlayerElem and videoAreaElem)
+  //       .video[.fullwindow]
+  //         #video-container
+  //           video-js#ani_video.video-js (videoContainerElem)
+  //             video#ani_video_html5_api.vjs-tech
+  //             .vjs-control-bar ... .control-bar-rightbtn (settingsMenuBtnParent)
+  //     .subtitle (danmaku list)
+  // The classes between brackets are added in the theater mode (劇院模式).
+  // In fullscreen the html element is the fullscreen element and the body has the fullscreen class.
   initPlayerElems(videoElem) {
-    const videoPlayerElem = videoElem.closest('.bpx-player-container');
+    const videoPlayerElem = videoElem.closest('.videoframe');
     if (!videoPlayerElem) {
-      const error = new Error(
-        'Cannot find videoPlayerElem: .bpx-player-container'
-      );
+      const error = new Error('Cannot find videoPlayerElem: .videoframe');
       error.details = getPageElems();
       error.details.videoIsInDocument = document.contains(videoElem);
       error.details.videoTree = getNodeTreeString(videoElem);
@@ -168,11 +165,11 @@ export default class Ambientlight {
     }
 
     const settingsMenuBtnParent = videoPlayerElem.querySelector(
-      '.bpx-player-control-bottom-right'
+      '.vjs-control-bar .control-bar-rightbtn'
     );
     if (!settingsMenuBtnParent) {
       const error = new Error(
-        'Cannot find settingsMenuBtnParent: .bpx-player-control-bottom-right'
+        'Cannot find settingsMenuBtnParent: .vjs-control-bar .control-bar-rightbtn'
       );
       error.details = getPageElems();
       setWarning(`載入失敗。\n${error.message}`);
@@ -181,14 +178,13 @@ export default class Ambientlight {
 
     this.videoPlayerElem = videoPlayerElem;
     this.videoPlayerElem.dataset.ytalElem = 'video-player';
-    this.videoAreaElem =
-      videoElem.closest('.bpx-player-video-area') ?? this.videoPlayerElem;
+    this.videoAreaElem = this.videoPlayerElem;
     this.videoContainerElem =
-      videoElem.closest('.bpx-player-video-wrap') ?? videoElem.parentElement;
+      videoElem.closest('.video-js') ?? videoElem.parentElement;
     this.settingsMenuBtnParent = settingsMenuBtnParent;
   }
 
-  // Called when Bilibili has replaced the video player (For example: after navigating to another video)
+  // Called when the video player has been replaced (For example: after navigating to another episode)
   async reinitPlayerElems(videoElem) {
     const previousVideoPlayerElem = this.videoPlayerElem;
     this.resetVideoParentElemStyle();
@@ -488,7 +484,7 @@ export default class Ambientlight {
       },
       encrypted: () => {
         this.settings.setWarning(
-          '這部影片受到 Bilibili 的 DRM 保護，無法顯示環境光',
+          '這部影片受到 DRM 保護，無法顯示環境光',
           true,
           true,
           'encrypted'
@@ -590,14 +586,14 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
             this.chromiumBugVideoJitterWorkaround.update();
         }, true),
         {
-          rootMargin: '-70px 0px 0px 0px', // header height (64px) + additional pixels to be safe
+          rootMargin: '-105px 0px 0px 0px', // header height (100px) + additional pixels to be safe
           threshold: 0.0001, // Because sometimes a pixel in not visible on screen but the intersectionRatio is already 0
         }
       );
     }
     this.videoObserver.observe(this.videoElem);
 
-    // The video element can be replaced by Bilibili
+    // The video element can be replaced by the video player
     if (this.videoResizeObserver) {
       this.videoResizeObserver.disconnect();
       this.videoResizeObserver.observe(this.videoElem);
@@ -787,14 +783,13 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
 
     this.theming.initListeners();
 
-    // Bilibili changes the view with the data-screen attribute
-    // and the mirror setting with the bpx-state-mirror class
+    // The theater mode adds the vjs-fullwindow class to the .videoframe
+    // and the fullscreen mode adds the fullscreen class to the body
     this.videoPlayerObserver = new MutationObserver(
       wrapErrorHandler(
         async function videoPlayerMutation() {
-          const mirroredChanged = this.updateIsMirrored();
           const viewChanged = await this.updateView();
-          if (!viewChanged && !mirroredChanged) return;
+          if (!viewChanged) return;
 
           await this.optionalFrame();
         }.bind(this),
@@ -813,20 +808,13 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     this.videoPlayerObserver.disconnect();
     this.videoPlayerObserver.observe(this.videoPlayerElem, {
       attributes: true,
-      attributeFilter: ['class', 'data-screen'],
+      attributeFilter: ['class'],
     });
-    this.updateIsMirrored();
+    this.videoPlayerObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['class'],
+    });
   }
-
-  updateIsMirrored = () => {
-    const isMirrored =
-      this.videoPlayerElem?.classList.contains('bpx-state-mirror') ?? false;
-    if (this.isMirrored === isMirrored) return false;
-
-    this.isMirrored = isMirrored;
-    this.sizesChanged = true;
-    return true;
-  };
 
   delayResizes = true;
   resizeDurationThreshold = 300;
@@ -990,7 +978,7 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     this.containerElem.style.position = 'absolute';
     this.elem.prepend(this.containerElem);
 
-    // Always created, because Bilibili can render the header after the ambientlight has been initialized
+    // Always created, because the header can be rendered after the ambientlight has been initialized
     this.topElem = document.createElement('div');
     this.topElem.classList.add('ambientlight__top');
     this.elem.prepend(this.topElem);
@@ -1032,10 +1020,10 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     await this.initProjector();
   }
 
-  // Not inside #app, because Vue could re-render #app or mount other components in the ambientlight element
+  // Not inside #BH_background, because the scripts of the page could re-render it
   getContentElem = () => document.body;
 
-  // Bilibili can replace the top level element of the page (#app) and the header after the page has been loaded.
+  // The top level element of the page (#BH_background) and the header could be replaced after the page has been loaded.
   // Returns true when an element has been replaced.
   updatePageElems(appElem, mastheadElem) {
     let changed = false;
@@ -1055,8 +1043,8 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     return changed;
   }
 
-  // In fullscreen and web fullscreen (data-screen="full" or "web") the player is
-  // positioned above the page. So the ambient light has to be placed inside the player.
+  // In fullscreen all the elements of the page except the .videoframe are hidden (body.fullscreen).
+  // So the ambient light has to be placed inside the .videoframe.
   getFullscreenContentElem() {
     if (
       document.fullscreenElement &&
@@ -1421,8 +1409,8 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     );
   }
 
-  // Bilibili stretches the video element to the size of the player and
-  // letterboxes the video frame inside it (object-fit: contain).
+  // The video.js player stretches the video element to the size of the player and
+  // the browser letterboxes the video frame inside it (object-fit: contain).
   // Returns the area of the video frame inside the video element (without transforms)
   getVideoContentRect() {
     const width = this.videoElem?.offsetWidth ?? 0;
@@ -1477,13 +1465,15 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
 
     if (!document.contains(this.videoPlayerElem)) return VIEW_DETACHED;
 
-    const screen = this.videoPlayerElem.getAttribute('data-screen');
-    if (document.fullscreenElement || screen === 'full' || screen === 'web')
+    if (
+      document.fullscreenElement ||
+      document.body.classList.contains('fullscreen')
+    )
       return VIEW_FULLSCREEN;
 
-    if (screen === 'mini') return VIEW_POPUP;
-
-    if (screen === 'wide') return VIEW_THEATER;
+    // Theater mode (劇院模式)
+    if (this.videoPlayerElem.classList.contains('vjs-fullwindow'))
+      return VIEW_THEATER;
 
     return VIEW_SMALL;
   };
@@ -1491,7 +1481,7 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
   updateView = async (skipUpdateImmersiveMode = false) => {
     const view = this.getView();
     if (this.view === view) {
-      // Bilibili could have removed the ambientlight element from the page
+      // The page could have removed the ambientlight element
       if (this.elem && !this.elem.isConnected) this.appendElemToViewContainer();
       return false;
     }
@@ -1583,7 +1573,7 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
       !noClipOrScale;
     if (this.shouldStyleVideoParentElem) {
       // Hide the removed bars with a clip-path and scale the video with the scale property.
-      // Both properties are independent of the transform that Bilibili uses to mirror the video.
+      // Both properties are independent of the transforms that the video player could use.
       const content = this.getVideoContentRect();
       const clipX = Math.max(
         0,
@@ -1645,7 +1635,6 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     this.projectorsElem.style.transform = `
       scale(${this.videoScale / 100})
       scale(${this.clippedVideoScale[0]}, ${this.clippedVideoScale[1]})
-      ${this.isMirrored ? 'scaleX(-1)' : ''}
     `;
     if (this.settings.webGL) this.projector.cropped = false;
 
@@ -1901,8 +1890,8 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
       !!this.settings.transparentSidePanels
     );
     html.toggleAttribute(
-      'data-ambientlight-transparent-sending-bar',
-      !!this.settings.transparentSendingBar
+      'data-ambientlight-transparent-comments',
+      !!this.settings.transparentComments
     );
     html.toggleAttribute(
       'data-ambientlight-transparent-page-content',
@@ -2606,8 +2595,8 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
   setDrawWarning = (ex) => {
     const message =
       ex.name === 'SecurityError'
-        ? '重新整理可能有幫助，但最可能的原因是瀏覽器不允許環境光讀取這部 Bilibili 影片的像素。其他 Bilibili 影片應該不會有這個問題。'
-        : `重新整理頁面可能有幫助。如果沒有，可能是這部 Bilibili 影片本身有問題，也可以搜尋下方的錯誤訊息。\n\n錯誤：${ex.name}\n原因：${ex.message}`;
+        ? '重新整理可能有幫助，但最可能的原因是瀏覽器不允許環境光讀取這部影片的像素。其他動畫瘋影片應該不會有這個問題。'
+        : `重新整理頁面可能有幫助。如果沒有，可能是這部動畫瘋影片本身有問題，也可以搜尋下方的錯誤訊息。\n\n錯誤：${ex.name}\n原因：${ex.message}`;
 
     this.settings.setWarning(
       `無法顯示環境光\n\n${message}`
@@ -3382,30 +3371,18 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
   );
 
   async hide() {
-    // Bilibili shows a mini player when the page is scrolled down to the comments.
-    // Then only the ambient light is hidden, because resetting the theme and the
-    // blended elements while scrolling would flash the whole page.
-    const keepPageStyle =
-      this.settings.enabled && this.isOnVideoPage && this.view === VIEW_POPUP;
-    if (this.isHidden) {
-      // For example: Enabled or disabled while the mini player is shown
-      if (this.keepPageStyle !== keepPageStyle) {
-        this.keepPageStyle = keepPageStyle;
-        if (keepPageStyle) {
-          await this.applyPageStyle();
-        } else {
-          await this.resetPageStyle();
-        }
-      }
-      return;
-    }
+    if (this.isHidden) return;
     this.isHidden = true;
-    this.keepPageStyle = keepPageStyle;
 
     if (this.chromiumBugVideoJitterWorkaround?.update)
       this.chromiumBugVideoJitterWorkaround.update();
 
-    if (!keepPageStyle) await this.resetPageStyle();
+    const toDark = this.theming.shouldBeDarkTheme(false);
+    await injectedScript.postAndReceiveMessage('hide', {
+      toDark,
+    });
+
+    await this.theming.updateTheme();
 
     if (this.videoOverlay?.elem?.isConnected) {
       this.videoOverlay.elem.remove();
@@ -3421,29 +3398,9 @@ Video ready state: ${readyStateToString(videoElem?.readyState)}`);
     await this.updateSizes();
   }
 
-  applyPageStyle = async () => {
-    await injectedScript.postAndReceiveMessage('show', {
-      toDark: this.theming.shouldBeDarkTheme(true),
-      hideScrollbar: this.settings.hideScrollbar,
-      immersiveMode: this.shouldEnableImmersiveMode(),
-    });
-
-    await this.theming.updateTheme();
-  };
-
-  resetPageStyle = async () => {
-    const toDark = this.theming.shouldBeDarkTheme(false);
-    await injectedScript.postAndReceiveMessage('hide', {
-      toDark,
-    });
-
-    await this.theming.updateTheme();
-  };
-
   async show() {
     if (!this.isHidden) return;
     this.isHidden = false;
-    this.keepPageStyle = false;
 
     const toDark = this.theming.shouldBeDarkTheme(true);
     await injectedScript.postAndReceiveMessage('show', {

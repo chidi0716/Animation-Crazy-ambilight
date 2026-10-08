@@ -104,7 +104,7 @@ const importSettings = async (storageName, importJson) => {
     importExportStatus.textContent = `已從${storageName}匯入 ${
       Object.keys(settings).length
     } 項設定。
-（請重新整理已開啟的 Bilibili 分頁來套用新的設定）${
+（請重新整理已開啟的動畫瘋分頁來套用新的設定）${
       importWarnings.length
         ? `\n\n有 ${importWarnings.length} 個警告：\n- ${importWarnings.join(
             '\n- '
@@ -216,7 +216,7 @@ on(exportFileButton, 'click', async () => {
     const link = (exportedSettingsLink =
       exportedSettingsLink ?? document.createElement('a'));
     link.setAttribute('href', URL.createObjectURL(blob));
-    link.setAttribute('download', 'ambient-light-for-bilibili-settings.json');
+    link.setAttribute('download', 'ambient-light-for-ani-gamer-settings.json');
     link.setAttribute(
       'title',
       '如果自動下載被封鎖：\n1. 在這個連結上按右鍵\n2. 點選「另存連結為⋯」'
@@ -224,7 +224,7 @@ on(exportFileButton, 'click', async () => {
     link.style.display = 'block';
     link.style.marginTop = '0';
     link.style.marginBottom = '4px';
-    link.textContent = 'ambient-light-for-bilibili-settings.json';
+    link.textContent = 'ambient-light-for-ani-gamer-settings.json';
     importExportStatusDetails.parentElement.insertBefore(
       link,
       importExportStatusDetails

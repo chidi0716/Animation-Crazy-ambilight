@@ -7,9 +7,10 @@ const THEME_LIGHT = -1;
 const THEME_DEFAULT = 0;
 const THEME_DARK = 1;
 
-// Bilibili switches between the light and dark theme by:
-// - Toggling the night-mode class on the html element
-// - Swapping the light.css and dark.css stylesheet in the link#__css-map__ element
+// ani.gamer.com.tw switches between the light and dark theme with the data-theme attribute
+// on the html element: <html data-theme="light|dark">
+// The ambient light only changes the attribute and not the dark mode switch in the menu of the page,
+// so that the theme that has been selected on ani.gamer.com.tw (ANIME_dark_theme) is not changed.
 export default class Theming {
   constructor(ambientlight) {
     this.ambientlight = ambientlight;
@@ -17,14 +18,14 @@ export default class Theming {
   }
 
   initListeners() {
-    // The theme that has been selected in Bilibili
+    // The theme that has been selected on ani.gamer.com.tw
     this.siteTheme = this.isDarkTheme() ? THEME_DARK : THEME_LIGHT;
 
     try {
       matchMedia('(prefers-color-scheme: dark)').addEventListener(
         'change',
         wrapErrorHandler(() => {
-          // Give Bilibili the time to apply the system theme first
+          // Give the page the time to apply the system theme first
           setTimeout(() => this.handleSiteThemeChange(), 100);
         }, true)
       );
@@ -43,7 +44,7 @@ export default class Theming {
           }
           if (!this.shouldToggleTheme()) return;
 
-          // Bilibili has changed the theme back. Correct it a few times to prevent an infinite loop
+          // The page has changed the theme back. Correct it a few times to prevent an infinite loop
           themeCorrections++;
           this.updateTheme();
           if (themeCorrections === 5) this.themeObserver.disconnect();
@@ -53,7 +54,7 @@ export default class Theming {
     );
     this.themeObserver.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['class'],
+      attributeFilter: ['data-theme'],
     });
   }
 
@@ -66,17 +67,16 @@ export default class Theming {
   // Whether the ambient light has changed the theme of the page to the theme setting
   isForcingTheme = () =>
     this.settings.enabled &&
-    (!this.ambientlight.isHidden || this.ambientlight.keepPageStyle) &&
+    !this.ambientlight.isHidden &&
     this.settings.theme !== THEME_DEFAULT;
 
   isDarkTheme = () =>
-    document.documentElement.classList.contains('night-mode');
+    document.documentElement.getAttribute('data-theme') === 'dark';
 
   shouldBeDarkTheme = (enabledAndVisible) => {
     const disabled =
       enabledAndVisible === undefined
-        ? !this.settings.enabled ||
-          (this.ambientlight.isHidden && !this.ambientlight.keepPageStyle)
+        ? !this.settings.enabled || this.ambientlight.isHidden
         : !enabledAndVisible;
     const toTheme =
       disabled || this.settings.theme === THEME_DEFAULT
@@ -128,7 +128,7 @@ export default class Theming {
             this.settings.setWarning(
               `上一次切換主題失敗。為了避免頁面不斷重新整理，自動切換成${
                 this.isDarkTheme() ? '淺色' : '深色'
-              }外觀的功能暫停 10 秒。\n\n如果一直失敗，可以把「外觀（主題）」設為「跟隨 B 站」來永久停用自動切換。`
+              }外觀的功能暫停 10 秒。\n\n如果一直失敗，可以把「外觀（主題）」設為「跟隨動畫瘋」來永久停用自動切換。`
             );
             this.updatingTheme = false;
             return;
@@ -168,7 +168,7 @@ export default class Theming {
     this.settings.setWarning(
       `無法把頁面主題從${wasDark ? '深色' : '淺色'}切換成${
         wasDark ? '淺色' : '深色'
-      }。\n\n如果一直失敗，可以把「外觀（主題）」設為「跟隨 B 站」來永久停用自動切換。`
+      }。\n\n如果一直失敗，可以把「外觀（主題）」設為「跟隨動畫瘋」來永久停用自動切換。`
     );
   }
 }

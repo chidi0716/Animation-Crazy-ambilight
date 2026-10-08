@@ -773,7 +773,7 @@ export default class Settings {
       });
     }
 
-    // Prevent the Bilibili player from reacting to (for example) clicks and scrolls in the menu
+    // Prevent the video player from reacting to (for example) clicks and scrolls in the menu
     on(
       this.menuElem,
       'mousemove mousedown mouseup pointerdown pointerup click dblclick contextmenu wheel touchstart touchmove touchend',
@@ -1096,7 +1096,7 @@ export default class Settings {
               'immersiveHeader',
               'immersiveTheaterView',
               'transparentSidePanels',
-              'transparentSendingBar',
+              'transparentComments',
               'transparentPageContent',
               'webGL',
               'prioritizePageLoadSpeed',
@@ -1261,7 +1261,7 @@ export default class Settings {
               'fixedPosition',
               'immersiveHeader',
               'transparentSidePanels',
-              'transparentSendingBar',
+              'transparentComments',
               'transparentPageContent',
             ].some((name) => name === setting.name)
           ) {
@@ -1324,21 +1324,18 @@ export default class Settings {
   }
 
   createMenuButton() {
+    // Styled like the other buttons in the control bar of the video.js player
     const elem = document.createElement('div');
     elem.className =
-      'bpx-player-ctrl-btn ytp-ambientlight-settings-button is-loading';
+      'vjs-control vjs-button ytp-ambientlight-settings-button is-loading';
     elem.setAttribute('role', 'button');
     elem.setAttribute('tabindex', '0');
     elem.setAttribute('aria-label', '環境光');
     elem.setAttribute('aria-owns', 'ytp-id-190');
 
-    const iconElem = document.createElement('div');
-    iconElem.className = 'bpx-player-ctrl-btn-icon';
-    elem.appendChild(iconElem);
-
     const svgIconElem = document.createElement('span');
-    svgIconElem.className = 'bpx-common-svg-icon';
-    iconElem.appendChild(svgIconElem);
+    svgIconElem.className = 'ytp-ambientlight-settings-button__icon';
+    elem.appendChild(svgIconElem);
 
     // A screen with rays of light around it
     const xmlns = 'http://www.w3.org/2000/svg';
@@ -1384,22 +1381,13 @@ export default class Settings {
     return elem;
   }
 
-  // Places the button in the control bar of the player, next to the settings button of Bilibili
+  // Places the button in the right side of the control bar of the player, left of the quality button.
+  // The buttons in .control-bar-rightbtn are displayed in the reverse order (flex-direction: row-reverse)
   attachMenuBtn() {
     if (!this.menuBtn || !this.menuBtnParent) return;
+    if (this.menuBtn.parentElement === this.menuBtnParent) return;
 
-    const playerSettingsBtn = this.menuBtnParent.querySelector(
-      ':scope > .bpx-player-ctrl-setting'
-    );
-    if (playerSettingsBtn) {
-      if (playerSettingsBtn.previousElementSibling === this.menuBtn) return;
-
-      this.menuBtnParent.insertBefore(this.menuBtn, playerSettingsBtn);
-    } else {
-      if (this.menuBtn.parentElement === this.menuBtnParent) return;
-
-      this.menuBtnParent.prepend(this.menuBtn);
-    }
+    this.menuBtnParent.append(this.menuBtn);
   }
 
   attachMenuElems() {
@@ -1411,7 +1399,7 @@ export default class Settings {
       this.menuElemParent.prepend(this.bezelElem);
   }
 
-  // Called when Bilibili has replaced (a part of) the video player
+  // Called when (a part of) the video player has been replaced
   attachToPlayer(menuBtnParent, menuElemParent) {
     if (menuBtnParent) this.menuBtnParent = menuBtnParent;
     if (menuElemParent) this.menuElemParent = menuElemParent;

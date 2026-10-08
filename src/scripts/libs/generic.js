@@ -391,19 +391,13 @@ export const supportsColorMix = () => {
   return _supportsColorMix;
 };
 
-export const watchPagePaths = [
-  '/video/',
-  '/bangumi/play/',
-  '/list/',
-  '/medialist/play/',
-  '/festival/',
-  '/cheese/play/',
-];
+// The episodes of an anime are watched on https://ani.gamer.com.tw/animeVideo.php?sn=<episode>
+export const watchPagePaths = ['/animeVideo.php'];
 
 export const isWatchPageUrl = () =>
   watchPagePaths.some((path) => location.pathname.startsWith(path));
 
-// Embedded players (player.bilibili.com) are not supported yet
+// There are no embedded players on ani.gamer.com.tw
 export const isEmbedPageUrl = () => false;
 
 export const getCookie = async (name) =>
@@ -468,10 +462,11 @@ export const VIEW_DETACHED = 'DETACHED';
 export const VIEW_SMALL = 'SMALL';
 export const VIEW_THEATER = 'THEATER';
 export const VIEW_FULLSCREEN = 'FULLSCREEN';
-export const VIEW_POPUP = 'POPUP';
 
-export const playerContainerSelector = '.bpx-player-container';
-export const videoSelector = `${playerContainerSelector} .bpx-player-video-wrap video`;
+// The video.js player of ani.gamer.com.tw:
+// .videoframe > .video > #video-container > video-js#ani_video.video-js > video#ani_video_html5_api.vjs-tech
+export const playerContainerSelector = '.videoframe';
+export const videoSelector = `${playerContainerSelector} .video-js > video.vjs-tech`;
 
 let warningElem;
 let warningElemText;
@@ -519,7 +514,7 @@ export const setWarning = (text) => {
     titleElem.style.color = '#008cff';
     titleElem.style.fontSize = '22px';
     titleElem.style.lineHeight = '28px';
-    titleElem.textContent = 'Bilibili 環境光\n';
+    titleElem.textContent = '動畫瘋環境光\n';
     elem.appendChild(titleElem);
 
     const textElem = document.createElement('div');
@@ -555,7 +550,7 @@ export const canvas2DCrashTips = `
 
 可能的原因：
 - GPU 的記憶體被其他程式佔滿了。
-- 同時顯示太多個 Bilibili 網頁。GPU 同一時間能渲染的環境光數量有限。
+- 同時顯示太多個動畫瘋網頁。GPU 同一時間能渲染的環境光數量有限。
 - 你把某個設定改成了 GPU 不支援的值。請復原最後一次的變更並重新整理網頁，或用選單右上角的重設按鈕重設所有設定。`;
 
 export const canvasWebGLCrashTips = `${canvas2DCrashTips}
