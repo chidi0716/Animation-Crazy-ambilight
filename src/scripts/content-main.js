@@ -112,9 +112,25 @@ const detectReplacedPlayerElems = () => {
     }
   }, true);
 
-  // Throttled, because the danmaku (comments that fly over the video) and the danmaku list mutate the page continuously
-  const observer = new MutationObserver(function onPageMutation() {
-    if (scheduled) return;
+  // Changes inside these elements can never replace the player, the video or the ambient light elements.
+  // They mutate the page continuously. For example: The danmaku (comments that fly over the video),
+  // the danmaku list, the time display of the player and the statistics of the ambient light.
+  const ignoredContainersSelector = [
+    '.vjs-danmu',
+    '#danmu',
+    '.subtitle',
+    '.vjs-time-control',
+    '.vjs-progress-control',
+    '.webview_commendlist',
+    '.ambientlight__fps-list',
+    '.ytpa-ambientlight-settings-menu',
+  ].join(',');
+  const isRelevantMutation = (record) =>
+    !record.target.closest?.(ignoredContainersSelector);
+
+  // Throttled, because the page can still mutate a lot outside of the ignored containers
+  const observer = new MutationObserver(function onPageMutation(records) {
+    if (scheduled || !records.some(isRelevantMutation)) return;
 
     scheduled = true;
     setTimeout(check, 250);
