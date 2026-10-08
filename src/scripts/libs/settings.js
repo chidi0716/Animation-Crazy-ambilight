@@ -15,7 +15,7 @@ import SettingsConfig, {
   prepareSettingsConfigOnce,
   WebGLOnlySettings,
 } from './settings-config';
-import { getVersion, originalProjectLink, troubleshootLink } from './utils';
+import { getVersion, issuesLink, troubleshootLink } from './utils';
 import { storage } from './storage';
 
 export const FRAMESYNC_DECODEDFRAMES = 0;
@@ -412,18 +412,17 @@ export default class Settings {
     header2Content.className = 'ytp-menuitem-content';
     header2.appendChild(header2Content);
 
-    const originalProjectLinkElem = document.createElement('a');
-    originalProjectLinkElem.className = 'ytpa-feedback-link';
-    originalProjectLinkElem.href = originalProjectLink;
-    originalProjectLinkElem.target = '_blank';
-    originalProjectLinkElem.rel = 'noopener';
-    header2Label.appendChild(originalProjectLinkElem);
+    const issuesLinkElem = document.createElement('a');
+    issuesLinkElem.className = 'ytpa-feedback-link';
+    issuesLinkElem.href = issuesLink;
+    issuesLinkElem.target = '_blank';
+    issuesLinkElem.rel = 'noopener';
+    header2Label.appendChild(issuesLinkElem);
 
-    const originalProjectLinkText = document.createElement('span');
-    originalProjectLinkText.className = 'ytpa-feedback-link__text';
-    originalProjectLinkText.textContent =
-      '改編自 Wessel Kroos 的 Ambient light for YouTube™';
-    originalProjectLinkElem.appendChild(originalProjectLinkText);
+    const issuesLinkText = document.createElement('span');
+    issuesLinkText.className = 'ytpa-feedback-link__text';
+    issuesLinkText.textContent = '問題回報與建議';
+    issuesLinkElem.appendChild(issuesLinkText);
 
     let sectionContent;
 

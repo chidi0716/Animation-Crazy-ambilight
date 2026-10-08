@@ -1,4 +1,3 @@
-// Replaces the Sentry crash reporter of the original YouTube extension.
 // Errors are only logged to the console of the webpage and never sent anywhere.
 export default class ErrorReporter {
   static overflowProtection = 0;

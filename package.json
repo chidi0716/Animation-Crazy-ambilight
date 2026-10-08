@@ -1,12 +1,12 @@
 {
   "name": "ani-gamer-ambientlight",
   "version": "0.1.0",
-  "description": "This browser extension adds ambient light to the anime you watch on ani.gamer.com.tw (Bahamut Animation Crazy). Based on the Bilibili port by iceorange-dev of Ambient light for YouTube by Wessel Kroos.",
+  "description": "動畫瘋環境光：在巴哈姆特動畫瘋（ani.gamer.com.tw）的影片周圍加上環境光的瀏覽器擴充功能",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/chidi0716/Animation-Crazy-ambilight.git"
   },
-  "author": "chidi0716 (ani.gamer.com.tw port), iceorange-dev (Bilibili port), Wessel Kroos (original Ambient light for YouTube)",
+  "author": "chidi0716",
   "license": "MIT",
   "homepage": "https://github.com/chidi0716/Animation-Crazy-ambilight#readme",
   "bugs": {
@@ -17,11 +17,12 @@
     "build:manifest": "node manifest-copy.js",
     "build:html": "copyfiles -u 1 src/options.html dist",
     "build:images": "copyfiles -u 2 src/images/* dist/images",
+    "build:license": "copyfiles LICENSE dist",
     "build:styles:content": "sass --no-source-map src/styles/content.scss dist/styles/content.css",
     "build:styles:options": "copyfiles -u 2 src/styles/options.css dist/styles",
     "build:styles": "run-p build:styles:content build:styles:options",
     "build:scripts": "rollup -c",
-    "build": "run-s build:scripts build:styles build:manifest build:html build:images",
+    "build": "run-s build:scripts build:styles build:manifest build:html build:images build:license",
     "build:firefox": "npm run build && node manifest-copy.js firefox"
   },
   "engines": {

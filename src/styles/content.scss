@@ -1,5 +1,5 @@
-// Ambient light for ani.gamer.com.tw (巴哈姆特動畫瘋)
-// Based on the styles of the Bilibili port by iceorange-dev of Ambient light for YouTube™ by Wessel Kroos (MIT License)
+// 動畫瘋環境光 (Ambient light for ani.gamer.com.tw)
+// https://github.com/chidi0716/Animation-Crazy-ambilight
 
 @mixin input-range-track {
   &::-webkit-slider-runnable-track {@content}
@@ -333,7 +333,6 @@ html[data-ambientlight-enabled] {
     }
 
     // Disable the direct composition video overlay that can cause artifacts on Windows
-    // https://github.com/WesselKroos/youtube-ambilight/blob/master/TROUBLESHOOT.md#3-nvidia-rtx-video-super-resolution-vsr--nvidia-rtx-video-hdr-does-not-work
     > video.ambientlight__chromium-bug-direct-video-overlay-workaround {
       clip-path: var(--ytal-video-clip-path, inset(0% 0%));
       filter: opacity(1);
@@ -644,7 +643,6 @@ html[data-ambientlight-enabled] {
 $accent: #00b4d8;
 
 .ytal-bezel {
-  // Replaces the .ytp-bezel styles of the YouTube player
   position: absolute;
   z-index: 1002;
   left: 50%;
@@ -720,7 +718,6 @@ $accent: #00b4d8;
 }
 
 .ytpa-ambientlight-settings-menu {
-  // Replaces the .ytp-popup .ytp-settings-menu .ytp-rounded-menu styles of the YouTube player
   @include scrollbar-dark-thin();
   position: absolute;
   contain: content;

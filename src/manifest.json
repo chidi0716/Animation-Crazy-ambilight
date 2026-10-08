@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "動畫瘋環境光",
-  "description": "在巴哈姆特動畫瘋的影片周圍加上環境光，看動畫更有沉浸感！（非官方擴充功能，改編自 Wessel Kroos 的 Ambient light for YouTube）",
+  "description": "在巴哈姆特動畫瘋的影片周圍加上環境光，看動畫更有沉浸感！（非官方擴充功能）",
   "version": "0.0.0",
   "homepage_url": "https://github.com/chidi0716/Animation-Crazy-ambilight",
   "icons": {

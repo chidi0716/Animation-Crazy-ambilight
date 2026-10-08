@@ -25,6 +25,7 @@ export const getVersion = () => {
   }
 };
 
-export const originalProjectLink =
-  'https://github.com/WesselKroos/youtube-ambilight';
-export const troubleshootLink = `${originalProjectLink}/blob/master/TROUBLESHOOT.md`;
+export const projectLink =
+  'https://github.com/chidi0716/Animation-Crazy-ambilight';
+export const issuesLink = `${projectLink}/issues`;
+export const troubleshootLink = `${projectLink}#疑難排解`;

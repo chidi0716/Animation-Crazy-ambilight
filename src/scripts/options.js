@@ -1,10 +1,11 @@
 import { storage } from './libs/storage';
 import { syncStorage } from './libs/sync-storage';
-import { originalProjectLink, troubleshootLink } from './libs/utils';
+import { issuesLink, projectLink, troubleshootLink } from './libs/utils';
 import SettingsConfig from './libs/settings-config';
 import { on } from './libs/generic';
 
-document.querySelector('#originalProjectLink').href = originalProjectLink;
+document.querySelector('#projectLink').href = projectLink;
+document.querySelector('#issuesLink').href = issuesLink;
 document.querySelector('#troubleshootLink').href = troubleshootLink;
 
 const importExportStatus = document.querySelector('#importExportStatus');
@@ -26,8 +27,7 @@ const importSettings = async (storageName, importJson) => {
     if (typeof importedObject !== 'object')
       throw new Error('找不到可以匯入的設定');
 
-    // Temporarely import the setting blur as blur2
-    // https://github.com/WesselKroos/youtube-ambilight/issues/191#issuecomment-1703792823
+    // Settings files store the blur2 setting as blur
     if ('blur' in importedObject) {
       importedObject.blur2 = importedObject.blur;
       delete importedObject.blur;
@@ -159,8 +159,7 @@ const exportSettings = async (storageName, exportJson) => {
         '沒有可以匯出的設定。所有設定都還是預設值。'
       );
 
-    // Temporarely export the setting blur2 as blur
-    // https://github.com/WesselKroos/youtube-ambilight/issues/191#issuecomment-1703792823
+    // Settings files store the blur2 setting as blur
     if ('blur2' in exportObject) {
       exportObject.blur = exportObject.blur2;
       delete exportObject.blur2;

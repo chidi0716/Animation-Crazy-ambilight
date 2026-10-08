@@ -292,7 +292,7 @@ export default class Ambientlight {
   }
 
   // Disable the direct composition video overlay that can cause artifacts on Windows
-  // https://github.com/WesselKroos/youtube-ambilight/blob/master/TROUBLESHOOT.md#3-nvidia-rtx-video-super-resolution-vsr--nvidia-rtx-video-hdr-does-not-work
+  // For example: Random black/white blocks, flickering or a squashed video. NVIDIA RTX Video Super Resolution (VSR) requires the overlay
   detectChromiumBugDirectVideoOverlayWorkaround() {
     const match = navigator.userAgent.match(/Windows/);
     if (match?.length > 0) {

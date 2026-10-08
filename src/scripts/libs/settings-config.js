@@ -343,8 +343,8 @@ const SettingsConfig = [
     description: '會使用：CPU 與 GPU 效能',
     questionMark: {
       title:
-        'Chromium 有個錯誤：螢幕更新率高於 60Hz 時，影片播放會抖動。\n此修正會強制瀏覽器以螢幕的更新率運作，避免抖動。\n點擊問號查看這個 Chromium 錯誤的詳細資訊。',
-      href: 'https://github.com/WesselKroos/youtube-ambilight/issues/166',
+        'Chromium 有個錯誤：螢幕更新率高於 60Hz 時，影片播放會抖動。\n此修正會強制瀏覽器以螢幕的更新率運作，避免抖動。\n點擊問號查看詳細說明。',
+      href: 'https://github.com/chidi0716/Animation-Crazy-ambilight#影片抖動',
     },
     type: 'checkbox',
     default: false, // Should not be enabled by default because it also adds CPU & GPU overhead on 60Hz displays. (60Hz+ detection keeps toggling between off/on when VRR is enabled in the OS.)
@@ -359,8 +359,8 @@ const SettingsConfig = [
       title: `影片使用硬體加速疊加層（MPO）時，此修正可以解決一些破圖問題。
 例如：隨機出現的黑色／白色方塊、閃爍或影片被壓扁。
 
-點擊問號查看這些問題的最新資訊。`,
-      href: 'https://github.com/WesselKroos/youtube-ambilight/blob/master/TROUBLESHOOT.md#3-nvidia-rtx-video-super-resolution-vsr--nvidia-rtx-video-hdr-does-not-work',
+點擊問號查看詳細說明。`,
+      href: 'https://github.com/chidi0716/Animation-Crazy-ambilight#影片破圖',
     },
     type: 'checkbox',
     default: false,
